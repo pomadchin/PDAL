@@ -46,6 +46,7 @@
 #include <ferry/FerryFilter.hpp>
 #include <merge/MergeFilter.hpp>
 #include <mortonorder/MortonOrderFilter.hpp>
+#include <radius/RadiusFilter.hpp>
 #include <range/RangeFilter.hpp>
 #include <reprojection/ReprojectionFilter.hpp>
 #include <sort/SortFilter.hpp>
@@ -200,6 +201,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
     PluginManager::initializePlugin(MergeFilter_InitPlugin);
     PluginManager::initializePlugin(MortonOrderFilter_InitPlugin);
+    PluginManager::initializePlugin(RadiusFilter_InitPlugin);
     PluginManager::initializePlugin(RangeFilter_InitPlugin);
     PluginManager::initializePlugin(ReprojectionFilter_InitPlugin);
     PluginManager::initializePlugin(SortFilter_InitPlugin);
