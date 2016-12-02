@@ -134,7 +134,6 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoint
     convertDimTypeJavaArrayToVector(env, dims, &pointSize, &dimTypes);
 
     char *buf = new char[pointSize];
-
     pv->getPackedPoint(dimTypes, idx, buf);
 
     jbyteArray array = env->NewByteArray(pointSize);
@@ -148,6 +147,7 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoint
 JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoints
   (JNIEnv *env, jobject obj, jobjectArray dims)
 {
+    std::chrono::steady_clock::time_point begin0 = std::chrono::steady_clock::now();
     PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
     PointViewPtr pv = pvrp->shared_pointer;
 
@@ -164,14 +164,26 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoints
     std::size_t bufSize = pointSize * pv->size();
     char *buf = new char[bufSize];
 
+    std::chrono::steady_clock::time_point begin1 = std::chrono::steady_clock::now();
     for (int idx = 0; idx < pv->size(); idx++) {
         appendPackedPoint(pv, dimTypes, idx, pointSize, buf);
     }
+    std::chrono::steady_clock::time_point end1 = std::chrono::steady_clock::now();
 
+    std::cout << "appendPackedPoint (milliseconds):" << std::chrono::duration_cast<std::chrono::milliseconds>(end1 - begin1).count() <<std::endl;
+
+    std::chrono::steady_clock::time_point begin2 = std::chrono::steady_clock::now();
     jbyteArray array = env->NewByteArray(bufSize);
     env->SetByteArrayRegion (array, 0, bufSize, reinterpret_cast<jbyte *>(buf));
+    std::chrono::steady_clock::time_point end2 = std::chrono::steady_clock::now();
+
+    std::cout << "jbyteArray creation (milliseconds):" << std::chrono::duration_cast<std::chrono::milliseconds>(end2 - begin2).count() <<std::endl;
 
     delete[] buf;
+
+    std::chrono::steady_clock::time_point end0 = std::chrono::steady_clock::now();
+
+    std::cout << "getPackedPoints (milliseconds):" << std::chrono::duration_cast<std::chrono::milliseconds>(end0 - begin0).count() <<std::endl;
 
     return array;
 }
