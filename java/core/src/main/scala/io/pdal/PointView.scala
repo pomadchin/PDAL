@@ -1,6 +1,6 @@
 package io.pdal
 
-import java.nio.ByteBuffer
+import java.nio.{ByteBuffer, ByteOrder}
 
 class PointView extends Native {
   def getPointCloud(idx: Long): PointCloud = getPointCloud(idx, layout.dimTypes())
@@ -52,7 +52,7 @@ class PointView extends Native {
       result(j) = packedPoint(from + j)
       j += 1
     }
-    ByteBuffer.wrap(result)
+    ByteBuffer.wrap(result).order(ByteOrder.nativeOrder())
   }
   /**
     * One dimension read; for multiple dims custom logic required.
@@ -81,7 +81,7 @@ class PointView extends Native {
 
   def get(idx: Int, dim: String): ByteBuffer = get(idx, findDimType(dim))
   def get(idx: Int, dim: DimType): ByteBuffer =
-    ByteBuffer.wrap(getPackedPoint(idx, Array(dim)))
+    ByteBuffer.wrap(getPackedPoint(idx, Array(dim))).order(ByteOrder.nativeOrder())
 
   def getX(idx: Int): Double = get(idx, DimType.X).getDouble
   def getY(idx: Int): Double = get(idx, DimType.Y).getDouble
@@ -90,6 +90,8 @@ class PointView extends Native {
   def getX(packedPoint: Array[Byte]): Double = get(packedPoint, DimType.X).getDouble
   def getY(packedPoint: Array[Byte]): Double = get(packedPoint, DimType.Y).getDouble
   def getZ(packedPoint: Array[Byte]): Double = get(packedPoint, DimType.Z).getDouble
+
+  private val endian = ByteOrder.nativeOrder()
 
   @native def layout(): PointLayout
   @native def size(): Int
