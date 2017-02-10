@@ -6,8 +6,8 @@ object Implicits extends Implicits
 
 trait Implicits {
   implicit class withDSLClassMethods(vec: Vector[DSLClass]) {
-    def generateCaseClasses: (String, String) = {
-      val path = "./core/src/main/scala/io/pdal/pipeline/PipelineExpressions.scala"
+    def generateCaseClasses(root: String = "."): (String, String) = {
+      val path = s"$root/core/src/main/scala/io/pdal/pipeline/PipelineExpressions.scala"
       println(s"${path} generation.")
 
       path -> s"""
@@ -28,10 +28,10 @@ trait Implicits {
        """.stripMargin
     }
 
-    def generateTypes: ((String, String), (String, String), (String, String)) = {
+    def generateTypes(root: String = "."): ((String, String), (String, String), (String, String)) = {
       val types = vec.groupBy(_.name).values.flatten
 
-      val readersPath = "./core/src/main/scala/io/pdal/pipeline/ReaderTypes.scala"
+      val readersPath = s"$root/core/src/main/scala/io/pdal/pipeline/ReaderTypes.scala"
       println(s"$readersPath generation.")
 
       val readers =
@@ -49,7 +49,7 @@ trait Implicits {
            |}
        """.stripMargin
 
-      val writersPath = "./core/src/main/scala/io/pdal/pipeline/WriterTypes.scala"
+      val writersPath = s"$root/core/src/main/scala/io/pdal/pipeline/WriterTypes.scala"
       println(s"$writersPath generation.")
 
       val writers =
@@ -67,7 +67,7 @@ trait Implicits {
            |}
        """.stripMargin
 
-      val filterPath = "./core/src/main/scala/io/pdal/pipeline/FilterTypes.scala"
+      val filterPath = s"$root/core/src/main/scala/io/pdal/pipeline/FilterTypes.scala"
       println(s"${filterPath} generation.")
 
       val filters =

@@ -33,10 +33,10 @@ object DSLGenerator {
       sys.error(s"Output of the command ($cmd) call is not a valid JSON.")
   }
 
-  def generate: Unit = {
+  def generate(root: String = "."): Unit = {
     val vec = run
-    val (pipelineExprPath, pipelineExprSrc) = vec.generateCaseClasses
-    val ((readersPath, readersSrc), (writersPath, writersSrc), (filtersPath, filtersSrc)) = vec.generateTypes
+    val (pipelineExprPath, pipelineExprSrc) = vec.generateCaseClasses(root)
+    val ((readersPath, readersSrc), (writersPath, writersSrc), (filtersPath, filtersSrc)) = vec.generateTypes(root)
 
     Files.write(Paths.get(pipelineExprPath), pipelineExprSrc.getBytes(StandardCharsets.UTF_8))
     Files.write(Paths.get(readersPath), readersSrc.getBytes(StandardCharsets.UTF_8))
