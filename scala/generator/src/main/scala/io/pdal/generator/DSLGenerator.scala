@@ -1,10 +1,9 @@
 package io.pdal.generator
 
-import java.io.File
-
 import io.circe.parser._
 
 import scala.sys.process._
+
 import java.nio.file.{Files, Paths}
 import java.nio.charset.StandardCharsets
 
@@ -34,20 +33,14 @@ object DSLGenerator {
       sys.error(s"Output of the command ($cmd) call is not a valid JSON.")
   }
 
-  def generate = {
-    //val vec = run
+  def generate: Unit = {
+    val vec = run
+    val (pipelineExprPath, pipelineExprSrc) = vec.generateCaseClasses
+    val ((readersPath, readersSrc), (writersPath, writersSrc), (filtersPath, filtersSrc)) = vec.generateTypes
 
-    //Files.write(Paths.get("file.txt"), "file contents".getBytes(StandardCharsets.UTF_8))
-
-    Paths.get(".")
-  }
-
-  def getListOfFiles(dir: String):List[File] = {
-    val d = new File(dir)
-    if (d.exists && d.isDirectory) {
-      d.listFiles.filter(_.isFile).toList
-    } else {
-      List[File]()
-    }
+    Files.write(Paths.get(pipelineExprPath), pipelineExprSrc.getBytes(StandardCharsets.UTF_8))
+    Files.write(Paths.get(readersPath), readersSrc.getBytes(StandardCharsets.UTF_8))
+    Files.write(Paths.get(writersPath), writersSrc.getBytes(StandardCharsets.UTF_8))
+    Files.write(Paths.get(filtersPath), filtersSrc.getBytes(StandardCharsets.UTF_8))
   }
 }

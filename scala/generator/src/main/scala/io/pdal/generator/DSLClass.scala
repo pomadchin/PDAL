@@ -12,11 +12,11 @@ case class DSLClass(
 
   def caseClassName = s"${pluginName.capitalize}${pluginType.init.capitalize}"
 
-  def generateCaseObjectType = s"case object $name extends ${pluginType.init.capitalize}Type"
+  def generateCaseObjectType = s"case object $pluginName extends ${pluginType.init.capitalize}Type"
 
   def generateCaseClass = {
     s"""
-       |case class $caseClassName(${fields.map { _.getTypedField }.mkString(", ")}, `type`: ExprType = ${name}) extends PipelineExpr
+       |case class $caseClassName(${fields.map { _.getTypedField }.mkString(", ")}, `type`: ExprType = ${pluginType.init.capitalize}Types.${pluginName}) extends PipelineExpr
       """.stripMargin
   }
 }

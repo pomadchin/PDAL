@@ -1,18 +1,3 @@
-/*
- * Copyright 2016 Azavea
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 package io.pdal.pipeline
 
@@ -27,691 +12,117 @@ sealed trait PipelineExpr {
 
 case class RawExpr(json: Json) extends PipelineExpr
 
-case class Read(
-  filename: String,
-  spatialreference: Option[String] = None,
-  tag: Option[String] = None,
-  `type`: Option[ReaderType] = None // usually auto derived by pdal
-) extends PipelineExpr
-
-case class FauxRead(
-  numPoints: Int,
-  mode: String, // constant | random | ramp | uniform | normal
-  stdevX: Option[Int] = None, // [default: 1]
-  stdevY: Option[Int] = None, // [default: 1]
-  stdevZ: Option[Int] = None, // [default: 1]
-  meanX: Option[Int] = None, // [default: 0]
-  meanY: Option[Int] = None, // [default: 0]
-  meanZ: Option[Int] = None, // [default: 0]
-  bounds: Option[String] = None, // [default: unit cube]
-  spatialreference: Option[String] = None,
-  tag: Option[String] = None,
-  `type`: ReaderType = ReaderTypes.faux
-) extends PipelineExpr
-
-object GdalRead {
-  def apply(filename: String, spatialreference: Option[String] = None, tag: Option[String] = None): Read =
-    Read(filename, spatialreference, tag, Some(ReaderTypes.gdal))
-}
-
-case class GeoWaveRead(
-  zookeeperUrl: String,
-  instanceName: String,
-  username: String,
-  password: String,
-  tableNamespace: String,
-  featureTypeName: Option[String] = None, // [default: PDAL_Point]
-  dataAdapter: Option[String] = None, // [default: FeatureCollectionDataAdapter]
-  pointsPerEntry: Option[String] = None, // [default: 5000u]
-  bounds: Option[String] = None, // [default: unit cube]
-  spatialreference: Option[String] = None,
-  tag: Option[String] = None,
-  `type`: ReaderType = ReaderTypes.geowave
-) extends PipelineExpr
-
-case class GreyhoundRead(
-  url: String,
-  bounds: Option[String] = None, // [default: the entire resource]
-  depthBegin: Option[Int] = None, // [default: 0]
-  depthEnd: Option[Int] = None, // [default: 0]
-  tilePath: Option[String] = None,
-  filter: Option[Json] = None,
-  threads: Option[Int] = None, // [default: 4]
-  spatialreference: Option[String] = None,
-  tag: Option[String] = None,
-  `type`: ReaderType = ReaderTypes.greyhound
-) extends PipelineExpr
-
-case class Ilvis2Read(
-  filename: String,
-  mapping: Option[String] = None,
-  metadata: Option[String] = None,
-  spatialreference: Option[String] = None,
-  tag: Option[String] = None,
-  `type`: ReaderType = ReaderTypes.ilvis2
-) extends PipelineExpr
-
-case class LasRead(
-  filename: String,
-  extraDims: Option[String] = None,
-  compression: Option[String] = None,
-  spatialreference: Option[String] = None,
-  tag: Option[String] = None,
-  `type`: ReaderType = ReaderTypes.las
-) extends PipelineExpr
-
-object MrsidRead {
-  def apply(filename: String, spatialreference: Option[String] = None, tag: Option[String] = None): Read =
-    Read(filename, spatialreference, tag, Some(ReaderTypes.mrsid))
-}
-
-object NitfRead {
-  def apply(filename: String, spatialreference: Option[String] = None, tag: Option[String] = None): Read =
-    Read(filename, spatialreference, tag, Some(ReaderTypes.nitf))
-}
-
-case class OciRead(
-  connection: String,
-  query: String,
-  xmlSchemaDump: Option[String] = None,
-  populatePointsourceid: Option[String] = None,
-  spatialreference: Option[String] = None,
-  tag: Option[String] = None,
-  `type`: ReaderType = ReaderTypes.oci
-) extends PipelineExpr
-
-object OptechRead {
-  def apply(filename: String, spatialreference: Option[String] = None, tag: Option[String] = None): Read =
-    Read(filename, spatialreference, tag, Some(ReaderTypes.optech))
-}
-
-object PcdRead {
-  def apply(filename: String, spatialreference: Option[String] = None, tag: Option[String] = None): Read =
-    Read(filename, spatialreference, tag, Some(ReaderTypes.pcd))
-}
-
-case class PgpointcloudRead(
-  connection: String,
-  table: String,
-  schema: Option[String] = None, // [default: public]
-  column: Option[String] = None, // [default: pa]
-  spatialreference: Option[String] = None,
-  tag: Option[String] = None,
-  `type`: ReaderType = ReaderTypes.pgpointcloud
-) extends PipelineExpr
-
-object PlyRead {
-  def apply(filename: String, spatialreference: Option[String] = None, tag: Option[String] = None): Read =
-    Read(filename, spatialreference, tag, Some(ReaderTypes.ply))
-}
-
-object PtsRead {
-  def apply(filename: String, spatialreference: Option[String] = None, tag: Option[String] = None): Read =
-    Read(filename, spatialreference, tag, Some(ReaderTypes.pts))
-}
-
-case class QfitRead(
-  filename: String,
-  flipCoordinates: Option[Boolean] = None,
-  scaleZ: Option[Double] = None,
-  spatialreference: Option[String] = None,
-  tag: Option[String] = None,
-  `type`: ReaderType = ReaderTypes.qfit
-) extends PipelineExpr
-
-case class RxpRead(
-  filename: String,
-  rdtp: Option[Boolean] = None,
-  syncToPps: Option[Boolean] = None,
-  minimal: Option[Boolean] = None,
-  reflectanceAsIntensity: Option[Boolean] = None,
-  minReflectance: Option[Double] = None,
-  maxReflectance: Option[Double] = None,
-  spatialreference: Option[String] = None,
-  tag: Option[String] = None,
-  `type`: ReaderType = ReaderTypes.rxp
-) extends PipelineExpr
-
-object SbetRead {
-  def apply(filename: String, spatialreference: Option[String] = None, tag: Option[String] = None): Read =
-    Read(filename, spatialreference, tag, Some(ReaderTypes.sbet))
-}
-
-case class SqliteRead(
-  connection: String,
-  query: String,
-  spatialreference: Option[String] = None,
-  tag: Option[String] = None,
-  `type`: ReaderType = ReaderTypes.sqlite
-) extends PipelineExpr
-
-object TextRead {
-  def apply(filename: String, spatialreference: Option[String] = None, tag: Option[String] = None): Read =
-    Read(filename, spatialreference, tag, Some(ReaderTypes.text))
-}
-
-case class TindexRead(
-  filename: String,
-  layerName: Option[String] = None,
-  srsColumn: Option[String] = None,
-  tindexName: Option[String] = None,
-  sql: Option[String] = None,
-  wkt: Option[String] = None,
-  boundary: Option[String] = None,
-  tSrs: Option[String] = None,
-  filterSrs: Option[String] = None,
-  where: Option[String] = None,
-  dialect: Option[String] = None,
-  spatialreference: Option[String] = None,
-  tag: Option[String] = None,
-  `type`: ReaderType = ReaderTypes.tindex
-) extends PipelineExpr
-
-object TerrasolidRead {
-  def apply(filename: String, spatialreference: Option[String] = None, tag: Option[String] = None): Read =
-    Read(filename, spatialreference, tag, Some(ReaderTypes.terrasolid))
-}
-
-object IceBridgeRead {
-  def apply(filename: String, spatialreference: Option[String] = None, tag: Option[String] = None): Read =
-    Read(filename, spatialreference, tag, Some(ReaderTypes.icebridge))
-}
-
-case class ApproximateCoplanarFilter(
-  knn: Int, // [default: 8]
-  thresh1: Int, // [default: 25]
-  thresh2: Int, // [default: 6]
-  `type`: FilterType = FilterTypes.approximatecoplanar
-) extends PipelineExpr
-
-case class AttributeFilter(
-  dimension: Option[String] = None, // [default: none]
-  value: Option[Double] = None, // [default: none]
-  datasource: Option[String] = None, // [default: none]
-  column: Option[String] = None, // [default: none]
-  query: Option[String] = None, // [default: first column]
-  layer: Option[String] = None, // [default: first layer]
-  `type`: FilterType = FilterTypes.attribute
-) extends PipelineExpr
-
-case class ChipperFilter(
-  capacity: Option[Int] = None, // [default: 5000]
-  `type`: FilterType = FilterTypes.chipper
-) extends PipelineExpr
-
-case class ColorinterpFilter(
-  ramp: Option[String] = None, // [default: pestel_shades]
-  dimension: Option[String] = None, // [default: Z]
-  minimum: Option[String] = None,
-  maximum: Option[String] = None,
-  invert: Option[Boolean] = None, // [default: false]
-  k: Option[Double] = None,
-  mad: Option[Boolean] = None,
-  madMultiplier: Option[Double] = None,
-  `type`: FilterType = FilterTypes.colorinterp
-) extends PipelineExpr
-
-case class ColorizationFilter(
-  raster: String,
-  dimensions: Option[String] = None,
-  `type`: FilterType = FilterTypes.colorization
-) extends PipelineExpr
-
-case class ComputerangeFilter(
-  `type`: FilterType = FilterTypes.computerange
-) extends PipelineExpr
-
-case class CropFilter(
-  bounds: Option[String] = None,
-  polygon: Option[String] = None,
-  outside: Option[String] = None,
-  point: Option[String] = None,
-  radius: Option[String] = None,
-  `type`: FilterType = FilterTypes.crop
-) extends PipelineExpr
-
-case class DecimationFilter(
-  step: Option[Int] = None,
-  offset: Option[Int] = None,
-  limit: Option[Int] = None,
-  `type`: FilterType = FilterTypes.decimation
-) extends PipelineExpr
-
-case class DividerFilter(
-   mode: Option[String] = None,
-   count: Option[Int] = None,
-   capacity: Option[Int] = None,
-  `type`: FilterType = FilterTypes.divider
-) extends PipelineExpr
-
-case class EigenValuesFilter(
-  knn: Option[Int] = None,
-  `type`: FilterType = FilterTypes.eigenvalues
-) extends PipelineExpr
-
-case class EstimateRankFilter(
-  knn: Option[Int] = None,
-  thresh: Option[Double] = None,
-  `type`: FilterType = FilterTypes.estimaterank
-) extends PipelineExpr
-
-case class FerryFilter(
-  dimensions: String,
-  `type`: FilterType = FilterTypes.ferry
-) extends PipelineExpr
-
-case class GreedyProjectionFilter(
-  `type`: FilterType = FilterTypes.greedyprojection
-) extends PipelineExpr
-
-case class GridProjectionFilter(
-  `type`: FilterType = FilterTypes.gridprojection
-) extends PipelineExpr
-
-case class HagFilter(
-  `type`: FilterType = FilterTypes.hag
-) extends PipelineExpr
-
-case class HexbinFilter(
-  edgeSize: Option[Int] = None,
-  sampleSize: Option[Int] = None,
-  threshold: Option[Int] = None,
-  precision: Option[Int] = None,
-  `type`: FilterType = FilterTypes.hexbin
-) extends PipelineExpr
-
-case class IqrFilter(
-  dimension: String,
-  k: Option[Double] = None,
-  `type`: FilterType = FilterTypes.iqr
-) extends PipelineExpr
-
-case class KDistanceFilter(
-  k: Option[Int] = None,
-  `type`: FilterType = FilterTypes.kdistance
-) extends PipelineExpr
-
-case class LofFilter(
-  minpts: Option[Int] = None,
-  `type`: FilterType = FilterTypes.lof
-) extends PipelineExpr
-
-case class MadFilter(
-  dimension: String,
-  k: Option[Double] = None,
-  `type`: FilterType = FilterTypes.mad
-) extends PipelineExpr
-
-case class MergeFilter(
-  inputs: List[String],
-  tag: Option[String] = None,
-  `type`: FilterType = FilterTypes.merge
-) extends PipelineExpr
-
-case class MongusFilter(
-  cell: Option[Double] = None,
-  classify: Option[Boolean] = None,
-  extract: Option[Boolean] = None,
-  k: Option[Double] = None,
-  l: Option[Int] = None,
-  `type`: FilterType = FilterTypes.mongus
-) extends PipelineExpr
-
-case class MortnOrderFilter(
-  `type`: FilterType = FilterTypes.mortonorder
-) extends PipelineExpr
-
-case class MovingLeastSquaresFilter(
-  `type`: FilterType = FilterTypes.movingleastsquares
-) extends PipelineExpr
-
-case class NormalFilter(
-  knn: Option[Int] = None,
-  `type`: FilterType = FilterTypes.normal
-) extends PipelineExpr
-
-case class OutlierFilter(
-  method: Option[String] = None,
-  minK: Option[Int] = None,
-  radius: Option[Double] = None,
-  meanK: Option[Int] = None,
-  multiplier: Option[Double] = None,
-  classify: Option[Boolean] = None,
-  extract: Option[Boolean] = None,
-  `type`: FilterType = FilterTypes.outlier
-) extends PipelineExpr
-
-case class PclBlockFilter(
-  filename: String,
-  methods: Option[List[String]] = None,
-  `type`: FilterType = FilterTypes.pclblock
-) extends PipelineExpr
-
-case class PmfFilter(
-  maxWindowSize: Option[Int] = None,
-  slope: Option[Double] = None,
-  maxDistance: Option[Double] = None,
-  initialDistance: Option[Double] = None,
-  cellSize: Option[Int] = None,
-  classify: Option[Boolean] = None,
-  extract: Option[Boolean] = None,
-  approximate: Option[Boolean] = None,
-  `type`: FilterType = FilterTypes.pmf
-) extends PipelineExpr
-
-case class PoissonFilter(
-  depth: Option[Int] = None,
-  pointWeight: Option[Double] = None,
-  `type`: FilterType = FilterTypes.poisson
-) extends PipelineExpr
-
-case class PredicateFilter(
-  script: String,
-  module: String,
-  function: String,
-  `type`: FilterType = FilterTypes.predicate
-) extends PipelineExpr
-
-case class ProgrammableFilter(
-  script: String,
-  module: String,
-  function: String,
-  source: String,
-  addDimenstion: Option[String] = None,
-  `type`: FilterType = FilterTypes.programmable
-) extends PipelineExpr
-
-case class RadialDensityFilter(
-  radius: Option[Double] = None,
-  `type`: FilterType = FilterTypes.radialdensity
-) extends PipelineExpr
-
-case class RandomizeFilter(
-  `type`: FilterType = FilterTypes.randomize
-) extends PipelineExpr
-
-case class RangeFilter(
-  limits: Option[String] = None,
-  `type`: FilterType = FilterTypes.range
-) extends PipelineExpr
-
-case class ReprojectionFilter(
-  outSrs: String,
-  inSrs: Option[String] = None,
-  tag: Option[String] = None,
-  `type`: FilterType = FilterTypes.reprojection
-) extends PipelineExpr
-
-case class SampleFilter(
-  radius: Option[Double] = None,
-  `type`: FilterType = FilterTypes.sample
-) extends PipelineExpr
-
-case class SmrfFilter(
-  cell: Option[Double] = None,
-  classify: Option[Boolean] = None,
-  cut: Option[Double] = None,
-  extract: Option[Boolean] = None,
-  slope: Option[Double] = None,
-  threshold: Option[Double] = None,
-  window: Option[Double] = None,
-  `type`: FilterType = FilterTypes.smrf
-) extends PipelineExpr
-
-case class SortFilter(
-  dimension: String,
-  `type`: FilterType = FilterTypes.sort
-) extends PipelineExpr
-
-case class SplitterFilter(
-  length: Option[Int] = None,
-  originX: Option[Double] = None,
-  originY: Option[Double] = None,
-  `type`: FilterType = FilterTypes.splitter
-) extends PipelineExpr
-
-case class StatsFilter(
-  dimenstions: Option[String] = None,
-  enumerate: Option[String] = None,
-  count: Option[Int] = None,
-  `type`: FilterType = FilterTypes.stats
-) extends PipelineExpr
-
-case class TransformationFilter(
-  matrix: String,
-  `type`: FilterType = FilterTypes.transformation
-) extends PipelineExpr
-
-case class VoxelGridFilter(
-  leafX: Option[Double] = None,
-  leafY: Option[Double] = None,
-  leafZ: Option[Double] = None,
-  `type`: FilterType = FilterTypes.voxelgrid
-) extends PipelineExpr
-
-case class Write(
-  filename: String,
-  `type`: Option[WriterType] = None // usually auto derived by pdal
-) extends PipelineExpr
-
-case class BpfWrite(
-  filename: String,
-  compression: Option[Boolean] = None,
-  format: Option[String] = None,
-  bundledfile: Option[String] = None,
-  headerData: Option[String] = None,
-  coordId: Option[Int] = None,
-  scaleX: Option[Double] = None,
-  scaleY: Option[Double] = None,
-  scaleZ: Option[Double] = None,
-  offsetX: Option[String] = None,
-  offsetY: Option[String] = None,
-  offsetZ: Option[String] = None,
-  outputDims: Option[String] = None,
-  `type`: WriterType = WriterTypes.bpf
-) extends PipelineExpr
-
-case class DerivativeWrite(
-  filename: String,
-  primitiveType: Option[String] = None,
-  edgeLength: Option[Double] = None,
-  altitude: Option[Double] = None,
-  azimuth: Option[Double] = None,
-  `type`: WriterType = WriterTypes.derivative
-) extends PipelineExpr
-
-case class GdalWrite(
-  filename: String,
-  resoultion: Int,
-  radius: Double,
-  gdaldriver: Option[String] = None,
-  gdalopts: Option[String] = None,
-  outputType: Option[String] = None,
-  windowSize: Option[Int] = None,
-  dimension: Option[String] = None,
-  `type`: WriterType = WriterTypes.gdal
-) extends PipelineExpr
-
-case class GeoWaveWrite(
-  zookeeperUrl: String,
-  instanceName: String,
-  username: String,
-  password: String,
-  tableNamespace: String,
-  featureTypeName: Option[String] = None,
-  dataAdapter: Option[String] = None,
-  pointsPerEntry: Option[String] = None, // [default: 5000u]
-  `type`: WriterType = WriterTypes.geowave
-) extends PipelineExpr
-
-case class LasWrite(
-  filename: String,
-  forward: Option[String] = None,
-  minorVersion: Option[Int] = None,
-  softwareId: Option[String] = None,
-  creationDoy: Option[Int] = None,
-  creationYear: Option[Int] = None,
-  dataformatId: Option[Int] = None,
-  systemId: Option[String] = None,
-  aSrs: Option[String] = None,
-  globalEncoding: Option[String] = None,
-  projectId: Option[String] = None,
-  compression: Option[String] = None,
-  scaleX: Option[Double] = None,
-  scaleY: Option[Double] = None,
-  scaleZ: Option[Double] = None,
-  offsetX: Option[String] = None,
-  offsetY: Option[String] = None,
-  offsetZ: Option[String] = None,
-  filesourceId: Option[Int] = None,
-  discardHighReturnNumbers: Option[Boolean] = None,
-  `type`: WriterType = WriterTypes.las
-) extends PipelineExpr
-
-case class MatlabWrite(
-  filename: String,
-  outputDims: Option[String] = None,
-  `type`: WriterType = WriterTypes.matlab
-) extends PipelineExpr
-
-case class NitfWrite(
-  filename: String,
-  clevel: Option[String] = None,
-  stype: Option[String] = None,
-  ostaid: Option[String] = None,
-  ftitle: Option[String] = None,
-  fscalas: Option[String] = None,
-  oname: Option[String] = None,
-  ophone: Option[String] = None,
-  fsctlh: Option[String] = None,
-  fsclsy: Option[String] = None,
-  idatim: Option[String] = None,
-  iid2: Option[String] = None,
-  fscltx: Option[String] = None,
-  aimidb: Option[String] = None,
-  acftb: Option[String] = None,
-  `type`: WriterType = WriterTypes.nitf
-) extends PipelineExpr
-
-case class NullWrite(
-  `type`: WriterType = WriterTypes.`null`
-) extends PipelineExpr
-
-case class OciWrite(
-  connection: String,
-  is3d: Option[Boolean] = None,
-  solid: Option[Boolean] = None,
-  overwrite: Option[Boolean] = None,
-  verbose: Option[Boolean] = None,
-  srid: Option[Int] = None,
-  capacity: Option[Int] = None,
-  streamOutputPrecision: Option[Int] = None,
-  cloudId: Option[Int] = None,
-  blockTableName: Option[String] = None,
-  blockTablePartitionValue: Option[Int] = None,
-  baseTableName: Option[String] = None,
-  cloudColumnName: Option[String] = None,
-  baseTableAuxColumns: Option[String] = None,
-  baseTableAuxValues: Option[String] = None,
-  baseTableBoundaryColumn: Option[String] = None,
-  baseTableBoundaryWkt: Option[String] = None,
-  preBlockSql: Option[String] = None,
-  preSql: Option[String] = None,
-  postBlockSql: Option[String] = None,
-  baseTableBounds: Option[String] = None,
-  pcId: Option[Int] = None,
-  packIgnoredFields: Option[Boolean] = None,
-  streamChunks: Option[Boolean] = None,
-  blobChunkCount: Option[Int] = None,
-  scaleX: Option[Double] = None,
-  scaleY: Option[Double] = None,
-  scaleZ: Option[Double] = None,
-  offsetX: Option[Double] = None,
-  offsetY: Option[Double] = None,
-  offsetZ: Option[Double] = None,
-  outputDims: Option[String] = None,
-  `type`: WriterType = WriterTypes.oci
-) extends PipelineExpr
-
-case class P2gWrite(
-  filename: String,
-  gridDistX: Option[Int] = None,
-  gridDistY: Option[Int] = None,
-  radiuse: Option[Double] = None,
-  outputType: Option[String] = None,
-  outputFormat: Option[String] = None,
-  z: Option[String] = None,
-  bounds: Option[String] = None,
-  `type`: WriterType = WriterTypes.p2g
-) extends PipelineExpr
-
-case class PcdWrite(
-  filename: String,
-  compression: Option[Boolean] = None,
-  `type`: WriterType = WriterTypes.pcd
-) extends PipelineExpr
-
-case class PgpointcloudWrite(
-  connection: String,
-  table: String,
-  schema: Option[String] = None,
-  column: Option[String] = None,
-  compression: Option[String] = None,
-  overwrite: Option[Boolean] = None,
-  srid: Option[Int] = None,
-  pcid: Option[Int] = None,
-  preSql: Option[String] = None,
-  postSql: Option[String] = None,
-  scaleX: Option[Double] = None,
-  scaleY: Option[Double] = None,
-  scaleZ: Option[Double] = None,
-  offsetX: Option[Double] = None,
-  offsetY: Option[Double] = None,
-  offsetZ: Option[Double] = None,
-  outputDims: Option[String] = None,
-  `type`: WriterType = WriterTypes.pgpointcloud
-) extends PipelineExpr
-
-case class PlyWrite(
-  filename: String,
-  storageMode: Option[String] = None,
-  `type`: WriterType = WriterTypes.ply
-) extends PipelineExpr
-
-case class RialtoWrite(
-  filename: String,
-  maxLevels: Option[Int] = None,
-  overwrite: Option[Boolean] = None,
-  `type`: WriterType = WriterTypes.rialto
-) extends PipelineExpr
-
-case class SqliteWrite(
-  filename: String,
-  cloudTableName: String,
-  blockTableName: String,
-  cloudColumnName: Option[String] = None,
-  compression: Option[String] = None,
-  overwrite: Option[Boolean] = None,
-  preSql: Option[String] = None,
-  postSql: Option[String] = None,
-  scaleX: Option[Double] = None,
-  scaleY: Option[Double] = None,
-  scaleZ: Option[Double] = None,
-  offsetX: Option[Double] = None,
-  offsetY: Option[Double] = None,
-  offsetZ: Option[Double] = None,
-  outputDims: Option[String] = None,
-  `type`: WriterType = WriterTypes.sqlite
-) extends PipelineExpr
-
-case class TextWrite(
-  filename: String,
-  format: Option[String] = None,
-  order: Option[String] = None,
-  keepUnspecified: Option[Boolean] = None,
-  jscallback: Option[String] = None,
-  quoteHeader: Option[String] = None,
-  newline: Option[String] = None,
-  delimiter: Option[String] = None,
-  `type`: WriterType = WriterTypes.text
-) extends PipelineExpr
+case class ApproximatecoplanarFilter(log: String, knn: Some[Int] = Some(8), thresh1: Some[Int] = Some(25), thresh2: Some[Int] = Some(6), `type`: ExprType = FilterTypes.approximatecoplanar) extends PipelineExpr
+
+case class AttributeFilter(log: String, dimension: String, value: Some[String] = Some("nan"), datasource: String, column: String, query: String, layer: String, `type`: ExprType = FilterTypes.attribute) extends PipelineExpr
+
+case class ChipperFilter(log: String, capacity: Some[Int] = Some(5000), `type`: ExprType = FilterTypes.chipper) extends PipelineExpr
+
+case class ColorinterpFilter(log: String, dimension: Some[String] = Some("Z"), minimum: String, maximum: String, ramp: Some[String] = Some("pestel_shades"), invert: Some[String] = Some("false"), mad: Some[String] = Some("false"), mad_multiplier: Some[Double] = Some(1.4862), k: Some[Int] = Some(0), `type`: ExprType = FilterTypes.colorinterp) extends PipelineExpr
+
+case class ColorizationFilter(log: String, raster: String, dimensions: String, `type`: ExprType = FilterTypes.colorization) extends PipelineExpr
+
+case class ComputerangeFilter(log: String, `type`: ExprType = FilterTypes.computerange) extends PipelineExpr
+
+case class CropFilter(log: String, outside: String, a_srs: String, bounds: String, point: String, distance: String, polygon: String, `type`: ExprType = FilterTypes.crop) extends PipelineExpr
+
+case class DecimationFilter(log: String, step: Some[Int] = Some(1), offset: String, limit: Some[Double] = Some(1.8446744073709552E19), `type`: ExprType = FilterTypes.decimation) extends PipelineExpr
+
+case class DividerFilter(log: String, mode: Some[String] = Some("partition"), count: String, capacity: String, `type`: ExprType = FilterTypes.divider) extends PipelineExpr
+
+case class EigenvaluesFilter(log: String, knn: Some[Int] = Some(8), `type`: ExprType = FilterTypes.eigenvalues) extends PipelineExpr
+
+case class EstimaterankFilter(log: String, knn: Some[Int] = Some(8), thresh: Some[Double] = Some(0.01), `type`: ExprType = FilterTypes.estimaterank) extends PipelineExpr
+
+case class FerryFilter(log: String, dimensions: String, `type`: ExprType = FilterTypes.ferry) extends PipelineExpr
+
+case class HagFilter(log: String, `type`: ExprType = FilterTypes.hag) extends PipelineExpr
+
+case class IqrFilter(log: String, k: Some[Double] = Some(1.5), dimension: String, `type`: ExprType = FilterTypes.iqr) extends PipelineExpr
+
+case class KdistanceFilter(log: String, k: Some[Int] = Some(10), `type`: ExprType = FilterTypes.kdistance) extends PipelineExpr
+
+case class LofFilter(log: String, minpts: Some[Int] = Some(10), `type`: ExprType = FilterTypes.lof) extends PipelineExpr
+
+case class MadFilter(log: String, k: Some[Int] = Some(2), dimension: String, mad_multiplier: Some[Double] = Some(1.4862), `type`: ExprType = FilterTypes.mad) extends PipelineExpr
+
+case class MergeFilter(log: String, `type`: ExprType = FilterTypes.merge) extends PipelineExpr
+
+case class MongusFilter(log: String, cell: Some[Int] = Some(1), k: Some[Int] = Some(3), l: Some[Int] = Some(8), classify: Some[String] = Some("true"), extract: String, `type`: ExprType = FilterTypes.mongus) extends PipelineExpr
+
+case class MortonorderFilter(log: String, `type`: ExprType = FilterTypes.mortonorder) extends PipelineExpr
+
+case class NormalFilter(log: String, knn: Some[Int] = Some(8), `type`: ExprType = FilterTypes.normal) extends PipelineExpr
+
+case class OutlierFilter(log: String, method: Some[String] = Some("statistical"), min_k: Some[Int] = Some(2), radius: Some[Int] = Some(1), mean_k: Some[Int] = Some(8), multiplier: Some[Int] = Some(2), classify: Some[String] = Some("true"), extract: String, `type`: ExprType = FilterTypes.outlier) extends PipelineExpr
+
+case class PmfFilter(log: String, max_window_size: Some[Int] = Some(33), slope: Some[Int] = Some(1), max_distance: Some[Double] = Some(2.5), initial_distance: Some[Double] = Some(0.15), cell_size: Some[Int] = Some(1), classify: Some[String] = Some("true"), extract: String, approximate: String, `type`: ExprType = FilterTypes.pmf) extends PipelineExpr
+
+case class PredicateFilter(log: String, source: String, script: String, module: String, function: String, `type`: ExprType = FilterTypes.predicate) extends PipelineExpr
+
+case class ProgrammableFilter(log: String, source: String, script: String, module: String, function: String, add_dimension: String, `type`: ExprType = FilterTypes.programmable) extends PipelineExpr
+
+case class RadialdensityFilter(log: String, radius: Some[Int] = Some(1), `type`: ExprType = FilterTypes.radialdensity) extends PipelineExpr
+
+case class RangeFilter(log: String, limits: String, `type`: ExprType = FilterTypes.range) extends PipelineExpr
+
+case class ReprojectionFilter(log: String, out_srs: String, in_srs: String, `type`: ExprType = FilterTypes.reprojection) extends PipelineExpr
+
+case class SampleFilter(log: String, radius: Some[Int] = Some(1), `type`: ExprType = FilterTypes.sample) extends PipelineExpr
+
+case class SmrfFilter(log: String, classify: Some[String] = Some("true"), extract: String, cell: Some[Int] = Some(1), slope: Some[Double] = Some(0.15), window: Some[Int] = Some(18), scalar: Some[Double] = Some(1.25), threshold: Some[Double] = Some(0.5), cut: Some[Int] = Some(0), outdir: String, `type`: ExprType = FilterTypes.smrf) extends PipelineExpr
+
+case class SortFilter(log: String, dimension: String, `type`: ExprType = FilterTypes.sort) extends PipelineExpr
+
+case class SplitterFilter(log: String, length: Some[Int] = Some(1000), origin_x: Some[String] = Some("nan"), origin_y: Some[String] = Some("nan"), `type`: ExprType = FilterTypes.splitter) extends PipelineExpr
+
+case class StatsFilter(log: String, dimensions: String, enumerate: String, global: String, count: String, `type`: ExprType = FilterTypes.stats) extends PipelineExpr
+
+case class TransformationFilter(log: String, matrix: String, `type`: ExprType = FilterTypes.transformation) extends PipelineExpr
+
+case class BpfReader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), `type`: ExprType = ReaderTypes.bpf) extends PipelineExpr
+
+case class FauxReader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), bounds: Some[String] = Some("([0, 1], [0, 1], [0, 1])"), mean_x: String, mean_y: String, mean_z: String, stdev_x: Some[Int] = Some(1), stdev_y: Some[Int] = Some(1), stdev_z: Some[Int] = Some(1), mode: String, number_of_returns: String, `type`: ExprType = ReaderTypes.faux) extends PipelineExpr
+
+case class GdalReader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), `type`: ExprType = ReaderTypes.gdal) extends PipelineExpr
+
+case class Ilvis2Reader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), mapping: Some[String] = Some("All"), metadata: String, `type`: ExprType = ReaderTypes.ilvis2) extends PipelineExpr
+
+case class LasReader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), spatialreference: String, extra_dims: String, compression: Some[String] = Some("EITHER"), `type`: ExprType = ReaderTypes.las) extends PipelineExpr
+
+case class OptechReader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), `type`: ExprType = ReaderTypes.optech) extends PipelineExpr
+
+case class PgpointcloudReader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), table: String, connection: String, column: Some[String] = Some("pa"), schema: String, where: String, spatialreference: String, `type`: ExprType = ReaderTypes.pgpointcloud) extends PipelineExpr
+
+case class PlyReader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), `type`: ExprType = ReaderTypes.ply) extends PipelineExpr
+
+case class PtsReader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), `type`: ExprType = ReaderTypes.pts) extends PipelineExpr
+
+case class QfitReader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), flip_coordinates: String, scale_z: Some[Double] = Some(0.001), `type`: ExprType = ReaderTypes.qfit) extends PipelineExpr
+
+case class SbetReader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), `type`: ExprType = ReaderTypes.sbet) extends PipelineExpr
+
+case class TerrasolidReader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), `type`: ExprType = ReaderTypes.terrasolid) extends PipelineExpr
+
+case class TextReader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), `type`: ExprType = ReaderTypes.text) extends PipelineExpr
+
+case class TindexReader(log: String, filename: String, count: Some[Double] = Some(1.8446744073709552E19), lyr_name: Some[String] = Some("pdal"), srs_column: Some[String] = Some("srs"), tindex_name: Some[String] = Some("location"), sql: String, bounds: String, wkt: String, t_srs: Some[String] = Some("EPSG:4326"), filter_srs: String, where: String, dialect: Some[String] = Some("OGRSQL"), `type`: ExprType = ReaderTypes.tindex) extends PipelineExpr
+
+case class BpfWriter(log: String, filename: String, compression: String, header_data: String, format: Some[String] = Some("Dimension"), coord_id: Some[Int] = Some(-9999), bundledfile: String, output_dims: String, offset_x: String, offset_y: String, offset_z: String, scale_x: Some[Int] = Some(1), scale_y: Some[Int] = Some(1), scale_z: Some[Int] = Some(1), `type`: ExprType = WriterTypes.bpf) extends PipelineExpr
+
+case class DerivativeWriter(log: String, filename: String, edge_length: Some[Int] = Some(15), primitive_type: Some[String] = Some("slope_d8"), altitude: Some[Int] = Some(45), azimuth: Some[Int] = Some(315), driver: Some[String] = Some("GTiff"), `type`: ExprType = WriterTypes.derivative) extends PipelineExpr
+
+case class GdalWriter(log: String, filename: String, resolution: String, radius: String, gdaldriver: Some[String] = Some("GTiff"), gdalopts: String, output_type: Some[String] = Some("all"), window_size: String, nodata: Some[Int] = Some(-9999), dimension: Some[String] = Some("Z"), `type`: ExprType = WriterTypes.gdal) extends PipelineExpr
+
+case class LasWriter(log: String, filename: String, a_srs: String, compression: Some[String] = Some("None"), discard_high_return_numbers: String, extra_dims: String, forward: String, major_version: Some[String] = Some(""), minor_version: Some[String] = Some(""), dataformat_id: Some[String] = Some(""), format: Some[String] = Some(""), global_encoding: String, project_id: String, system_id: Some[String] = Some("PDAL"), software_id: Some[String] = Some("PDAL 1.4.0 (Releas)"), creation_doy: Some[Int] = Some(40), creation_year: Some[Int] = Some(2017), scale_x: Some[String] = Some(".01"), scale_y: Some[String] = Some(".01"), scale_z: Some[String] = Some(".01"), offset_x: String, offset_y: String, offset_z: String, `type`: ExprType = WriterTypes.las) extends PipelineExpr
+
+case class PgpointcloudWriter(log: String, output_dims: String, offset_x: String, offset_y: String, offset_z: String, scale_x: Some[Int] = Some(1), scale_y: Some[Int] = Some(1), scale_z: Some[Int] = Some(1), connection: String, table: String, column: Some[String] = Some("pa"), schema: String, compression: Some[String] = Some("dimensional"), overwrite: Some[String] = Some("true"), srid: Some[Int] = Some(4326), pcid: String, pre_sql: String, post_sql: String, `type`: ExprType = WriterTypes.pgpointcloud) extends PipelineExpr
+
+case class PlyWriter(log: String, filename: String, storage_mode: Some[String] = Some("default"), `type`: ExprType = WriterTypes.ply) extends PipelineExpr
+
+case class SbetWriter(log: String, filename: String, `type`: ExprType = WriterTypes.sbet) extends PipelineExpr
+
+case class TextWriter(log: String, filename: String, format: Some[String] = Some("csv"), jscallback: String, keep_unspecified: Some[String] = Some("true"), order: String, write_header: Some[String] = Some("true"), newline: Some[String] = Some(""), delimiter: Some[String] = Some(","), quote_header: Some[String] = Some("true"), precision: Some[Int] = Some(3), `type`: ExprType = WriterTypes.text) extends PipelineExpr
+      
+
+       
