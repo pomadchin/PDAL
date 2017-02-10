@@ -7,7 +7,10 @@ object Implicits extends Implicits
 trait Implicits {
   implicit class withDSLClassMethods(vec: Vector[DSLClass]) {
     def generateCaseClasses: (String, String) = {
-      "./core/src/main/scala/io/pdal/pipeline/PipelineExpressions.scala" -> s"""
+      val path = "./core/src/main/scala/io/pdal/pipeline/PipelineExpressions.scala"
+      println(s"${path} generation.")
+
+      path -> s"""
          |package io.pdal.pipeline
          |
          |import io.circe.Json
@@ -28,6 +31,9 @@ trait Implicits {
     def generateTypes: ((String, String), (String, String), (String, String)) = {
       val types = vec.groupBy(_.name).values.flatten
 
+      val readersPath = "./core/src/main/scala/io/pdal/pipeline/ReaderTypes.scala"
+      println(s"$readersPath generation.")
+
       val readers =
         s"""
            |package io.pdal.pipeline
@@ -42,6 +48,9 @@ trait Implicits {
            |  )
            |}
        """.stripMargin
+
+      val writersPath = "./core/src/main/scala/io/pdal/pipeline/WriterTypes.scala"
+      println(s"$writersPath generation.")
 
       val writers =
         s"""
@@ -58,6 +67,9 @@ trait Implicits {
            |}
        """.stripMargin
 
+      val filterPath = "./core/src/main/scala/io/pdal/pipeline/FilterTypes.scala"
+      println(s"${filterPath} generation.")
+
       val filters =
         s"""
            |package io.pdal.pipeline
@@ -73,16 +85,12 @@ trait Implicits {
            |}
        """.stripMargin
 
-      ("./core/src/main/scala/io/pdal/pipeline/ReaderTypes.scala" -> readers,
-       "./core/src/main/scala/io/pdal/pipeline/WriterTypes.scala" -> writers,
-       "./core/src/main/scala/io/pdal/pipeline/FilterTypes.scala" -> filters)
+      (readersPath -> readers, writersPath -> writers, filterPath -> filters)
     }
 
   }
 
   implicit val decoder: Decoder[DSLField] = Decoder.instance { c =>
-    println(c.as[Json])
-
     val (tpe, default) = c.get[Option[Int]]("default") match {
       case Right(Some(i)) => "Int" -> Some[Any](i)
       case Right(_) | Left(_) => c.get[Option[Double]]("default") match {
@@ -93,8 +101,6 @@ trait Implicits {
         }
       }
     }
-
-    println(s"tpe -> default: ${tpe -> default}")
 
     val description = c.get[String]("description") match {
       case Right(d) => d
