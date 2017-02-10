@@ -20,8 +20,7 @@ trait Implicits {
          |}
          |
          |case class RawExpr(json: Json) extends PipelineExpr
-         |
-         |${vec.map(_.generateCaseClass).mkString("\n| ")}
+         |${vec.collect{ case t if t.pluginName != "null" => t }.map(_.generateCaseClass).mkString("|")}
          |
        """.stripMargin
     }
@@ -36,10 +35,10 @@ trait Implicits {
            |sealed trait ReaderType extends ExprType { val `type` = "filters" }
            |
            |object ReaderTypes {
-           |  ${types.collect { case t if t.isReader => t.generateCaseObjectType }.mkString("\n|  ")}
+           |  ${types.collect { case t if t.isReader && t.pluginName != "null" => t.generateCaseObjectType }.mkString("\n|  ")}
            |
            |  lazy val all = List(
-           |    ${types.collect { case t if t.isReader => t.name }.mkString(",")}
+           |    ${types.collect { case t if t.isReader && t.pluginName != "null" => t.pluginName }.mkString(", ")}
            |  )
            |}
        """.stripMargin
@@ -51,10 +50,10 @@ trait Implicits {
            |sealed trait WriterType extends ExprType { val `type` = "writers" }
            |
            |object WriterTypes {
-           |  ${types.collect { case t if t.isWriter => t.generateCaseObjectType }.mkString("\n|  ")}
+           |  ${types.collect { case t if t.isWriter && t.pluginName != "null" => t.generateCaseObjectType }.mkString("\n|  ")}
            |
            |  lazy val all = List(
-           |    ${types.collect { case t if t.isWriter => t.name }.mkString(",")}
+           |    ${types.collect { case t if t.isWriter && t.pluginName != "null" => t.pluginName }.mkString(", ")}
            |  )
            |}
        """.stripMargin
@@ -66,10 +65,10 @@ trait Implicits {
            |sealed trait FilterType extends ExprType { val `type` = "filters" }
            |
            |object FilterTypes {
-           |  ${types.collect { case t if t.isFilter => t.generateCaseObjectType }.mkString("\n|  ")}
+           |  ${types.collect { case t if t.isFilter && t.pluginName != "null" => t.generateCaseObjectType }.mkString("\n|  ")}
            |
            |  lazy val all = List(
-           |    ${types.collect { case t if t.isFilter => t.name }.mkString(",")}
+           |    ${types.collect { case t if t.isFilter && t.pluginName != "null" => t.pluginName }.mkString(", ")}
            |  )
            |}
        """.stripMargin
@@ -82,22 +81,24 @@ trait Implicits {
   }
 
   implicit val decoder: Decoder[DSLField] = Decoder.instance { c =>
-    println(c.as[Json].right.toString)
+    println(c.as[Json])
 
     val (tpe, default) = c.get[Option[Int]]("default") match {
-      case Right(i) => "Int" -> Some(i: Any)
-      case Left(_) => c.get[Option[Double]]("default") match {
-        case Right(d) => "Double" -> Some(d: Any)
-        case Left(_) => c.get[Option[String]]("default") match {
-          case Right(s) => "String" -> Some(s: Any)
-          case Left(_) => "String" -> None
+      case Right(Some(i)) => "Int" -> Some[Any](i)
+      case Right(_) | Left(_) => c.get[Option[Double]]("default") match {
+        case Right(Some(d)) => "Double" -> Some[Any](d)
+        case Right(_) | Left(_) => c.get[Option[String]]("default") match {
+          case Right(Some(s)) => "String" -> Some[Any](s)
+          case Right(_) | Left(_) => "String" -> None
         }
       }
     }
 
+    println(s"tpe -> default: ${tpe -> default}")
+
     val description = c.get[String]("description") match {
       case Right(d) => d
-      case Left(e) => { println("No Description field"); "" }
+      case Left(_) => { println("No Description field"); "" }
     }
 
     val name = c.get[String]("name") match {
