@@ -35,12 +35,10 @@ object DSLGenerator {
 
   def generate(root: String = "."): Unit = {
     val vec = run
-    val (pipelineExprPath, pipelineExprSrc) = vec.generateCaseClasses(root)
-    val ((readersPath, readersSrc), (writersPath, writersSrc), (filtersPath, filtersSrc)) = vec.generateTypes(root)
+    val (exprs, (readers, writers, filters)) = vec.generateCaseClasses(root) -> vec.generateTypes(root)
 
-    Files.write(Paths.get(pipelineExprPath), pipelineExprSrc.getBytes(StandardCharsets.UTF_8))
-    Files.write(Paths.get(readersPath), readersSrc.getBytes(StandardCharsets.UTF_8))
-    Files.write(Paths.get(writersPath), writersSrc.getBytes(StandardCharsets.UTF_8))
-    Files.write(Paths.get(filtersPath), filtersSrc.getBytes(StandardCharsets.UTF_8))
+    exprs :: readers :: writers :: filters :: Nil foreach { case (path, src) =>
+      Files.write(Paths.get(path), src.getBytes(StandardCharsets.UTF_8))
+    }
   }
 }
