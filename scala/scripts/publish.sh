@@ -28,4 +28,4 @@ if ${SIGNED}; then
     COMMAND=publishSigned
 fi
 
-./sbt ${COMMAND}
+./sbt generator/run && ./sbt core/${COMMAND}
