@@ -28,4 +28,4 @@ if ${SIGNED}; then
     COMMAND=publishSigned
 fi
 
-./sbt "-212" ${COMMAND}-javastyle
+./sbt generator/run && ./sbt "-212" core/${COMMAND}-javastyle
