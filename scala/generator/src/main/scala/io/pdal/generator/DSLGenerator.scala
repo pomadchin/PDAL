@@ -24,7 +24,7 @@ object DSLGenerator {
           map.keys.head,
           map.values.flatMap { _.as[List[DSLField]] match {
             case Right(list) => list
-            case Left(e) => sys.error("Can't convert fields descriptions into List[DSLField].")
+            case Left(_) => sys.error("Can't convert fields descriptions into List[DSLField].")
           } }
         )
       }
