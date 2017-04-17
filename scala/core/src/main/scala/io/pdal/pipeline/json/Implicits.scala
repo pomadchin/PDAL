@@ -20,12 +20,11 @@ import io.pdal.pipeline._
 
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.extras._
-import io.circe.generic.extras.auto._
 import io.circe.syntax._
 
 object Implicits extends Implicits
 
-trait Implicits extends Serializable {
+trait Implicits extends /*AutoDerivation with*/ Serializable {
   implicit val customConfig: Configuration =
     Configuration.default.withSnakeCaseKeys.withDiscriminator("class_type")
 
@@ -42,7 +41,7 @@ trait Implicits extends Serializable {
     )
   }
 
-  implicit val rawExprDecoder: Decoder[RawExpr] = Decoder.instance { _.as[Json].right.map(RawExpr) }
+  implicit val rawExprDecoder: Decoder[RawExpr] = Decoder.instance { _.as[Json].right.map(RawExpr.apply) }
   implicit val pipelineConstructorDecoder: Decoder[PipelineConstructor] = Decoder.instance {
     _.downField("pipeline").as[PipelineConstructor]
   }

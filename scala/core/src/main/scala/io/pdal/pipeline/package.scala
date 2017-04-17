@@ -17,7 +17,6 @@
 package io.pdal
 
 import io.circe.Json
-import io.circe.generic.extras.auto._
 import io.circe.syntax._
 
 /**
@@ -39,4 +38,5 @@ package object pipeline extends json.Implicits with Implicits with Serializable 
   implicit def pipelineExprToJson(expr: PipelineExpr): Json = expr.asJson
   implicit def pipelineConstructorToJson(expr: PipelineConstructor): Json = expr.asJson
   implicit def pipelineConstructorToString(expr: PipelineConstructor): String = expr.asJson.noSpaces
+  implicit def pipelineConstructorToPipeline(expr: PipelineConstructor): Pipeline = Pipeline(expr)
 }
